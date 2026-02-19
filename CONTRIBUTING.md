@@ -34,7 +34,9 @@ a **type**, a **scope** and a **subject**:
 The **header** is mandatory and the **scope** of the header is optional.
 
 Any line of the commit message cannot be longer 100 characters! This allows the message to be easier
-to read in various git tools.
+to read on GitHub as well as in various git tools.
+
+The footer should contain a [closing reference to an issue][github-issue-closing] if any.
 
 Samples:
 
@@ -49,6 +51,8 @@ Introduce a request id and a reference to latest request. Dismiss incoming respo
 from latest request.
 
 Remove timeouts which were used to mitigate the racing issue but are obsolete now.
+
+Refs: #123
 ```
 
 ### Revert
@@ -99,9 +103,11 @@ The body should include the motivation for the change and contrast this with pre
 
 ### Footer
 
-The footer should contain any information about **Breaking Changes**.
+The footer should contain any information about **Breaking Changes** and is also the place to
+reference GitHub issues that this commit **Closes**.
 
 **Breaking Changes** should start with the word `BREAKING CHANGE:` with a space or two newlines. The
 rest of the commit message is then used for this.
 
 [conventional-commits]: https://www.conventionalcommits.org/en/v1.0.0/
+[github-issue-closing]: https://help.github.com/articles/closing-issues-via-commit-messages/
