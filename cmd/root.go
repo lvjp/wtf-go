@@ -29,6 +29,7 @@ func init() {
 	verbose := flags.Bool("verbose", false, "Enable verbose logging (debug level)")
 
 	factory := util.NewFactory(config, verbose)
+	rootCmd.AddCommand(NewCharmBracelet(factory))
 	rootCmd.AddCommand(NewHealthCheckCmd(factory))
 	rootCmd.AddCommand(NewServerCmd(factory))
 }
