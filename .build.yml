@@ -1,6 +1,8 @@
 image: alpine/3.23
+oauth: pages.sr.ht/PAGES:RW
 packages:
   - docker
+  - hut
 tasks:
   - init-docker: |
       sudo service docker start
@@ -33,3 +35,12 @@ tasks:
       docker build --file ./build/Dockerfile .
   - doc-build: |
       docker run --rm -v "$(pwd)/wtf-go:/wtf-go" -w /wtf-go/docs ne02ptzero/romero:latest build
+      cd wtf-go/docs/book
+      tar -czvf ../book.tar.gz .
+  - doc-deploy: |
+      if [[ $GIT_REF == refs/heads/main ]]; then
+        hut pages publish \
+          --domain lvjp.srht.site \
+          --subdirectory wtf-go \
+          wtf-go/docs/book.tar.gz
+      fi

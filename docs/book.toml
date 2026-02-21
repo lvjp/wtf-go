@@ -4,6 +4,7 @@ authors = ["Laurent VERDOÏA"]
 language = "en"
 
 [output.html]
+site-url = "/wtf-go/"
 git-repository-url = "https://git.sr.ht/~lvjp/wtf-go"
 edit-url-template = "https://git.sr.ht/~lvjp/wtf-go/tree/main/item/docs/src/{{ . }}"
 source-url-template = "https://git.sr.ht/~lvjp/wtf-go/tree/main/item/docs/src/{{ .Path }}#L{{ .Start }}-{{ .End }}"
