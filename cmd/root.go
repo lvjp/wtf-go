@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"git.sr.ht/~lvjp/wtf-go/internal/app/config"
 	"git.sr.ht/~lvjp/wtf-go/internal/pkg/cmd/util"
 	"git.sr.ht/~lvjp/wtf-go/pkg/buildinfo"
 
@@ -22,7 +21,11 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	flags := rootCmd.PersistentFlags()
-	config := flags.String("config", config.DefaultConfigPath, "Path to the configuration file")
+
+	// ANCHOR: default_config_path
+	config := flags.String("config", "/etc/wtf-go/config.yaml", "Path to the configuration file")
+	// ANCHOR_END: default_config_path
+
 	verbose := flags.Bool("verbose", false, "Enable verbose logging (debug level)")
 
 	factory := util.NewFactory(config, verbose)

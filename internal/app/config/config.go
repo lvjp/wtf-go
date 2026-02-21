@@ -9,12 +9,6 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-// ANCHOR: default_config_path
-
-const DefaultConfigPath = "/etc/wtf-go/config.yaml"
-
-// ANCHOR_END: default_config_path
-
 type Config struct {
 	Server Server `yaml:"server"`
 	Log    Log    `yaml:"log"`
@@ -27,10 +21,6 @@ type Server struct {
 type Log struct {
 	Level  string `validate:"omitempty,oneofci=debug info warn error fatal panic"`
 	Format string `validate:"omitempty,oneof=console json"`
-}
-
-func Load() (*Config, error) {
-	return LoadFromFile(DefaultConfigPath)
 }
 
 func LoadFromFile(path string) (*Config, error) {
