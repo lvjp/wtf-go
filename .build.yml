@@ -32,5 +32,4 @@ tasks:
       cd wtf-go
       docker build --file ./build/Dockerfile .
   - doc-build: |
-      cd wtf-go/docs
-      docker run --rm -v "$(pwd):/book" -w /book ne02ptzero/romero:latest build
+      docker run --rm -v "$(pwd)/wtf-go:/wtf-go" -w /wtf-go/docs ne02ptzero/romero:latest build
