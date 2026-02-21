@@ -18,9 +18,7 @@ tasks:
       [ "$(sha256sum golangci-lint-2.10.1-linux-amd64.tar.gz | cut -d ' ' -f 1)" == "dfa775874cf0561b404a02a8f4481fc69b28091da95aa697259820d429b09c99" ]
       sudo tar -xzf golangci-lint-2.10.1-linux-amd64.tar.gz -C /usr/local/bin --strip-components 1 golangci-lint-2.10.1-linux-amd64/golangci-lint
   - install-romero: |
-      go install git.sr.ht/~ne02ptzero/romero@latest
-      [ -x "$(go env GOPATH)" ]
-      sudo ln -s "$(go env GOPATH)"/bin/romero /usr/local/bin/romero
+      docker pull ne02ptzero/romero
   - go-modules: |
       cd wtf-go
       go mod tidy -diff
@@ -35,4 +33,4 @@ tasks:
       docker build --file ./build/Dockerfile .
   - doc-build: |
       cd wtf-go/docs
-      romero build
+      docker run --rm -v "$(pwd):/book" -w /book ne02ptzero/romero:latest build
