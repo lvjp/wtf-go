@@ -6,4 +6,4 @@
 [![API Reference](https://pkg.go.dev/badge/git.sr.ht/~lvjp/wtf-go)](https://pkg.go.dev/git.sr.ht/~lvjp/wtf-go)
 [![Go Report Card](https://goreportcard.com/badge/git.sr.ht/~lvjp/wtf-go)](https://goreportcard.com/report/git.sr.ht/~lvjp/wtf-go)
 
-Something in go.
+`wtf-go` is just something in go. Just ~~kidding~~ coding.
