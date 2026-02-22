@@ -7,3 +7,5 @@
 [![Go Report Card](https://goreportcard.com/badge/git.sr.ht/~lvjp/wtf-go)](https://goreportcard.com/report/git.sr.ht/~lvjp/wtf-go)
 
 `wtf-go` is just something in go. Just ~~kidding~~ coding.
+
+Documentation is available at: <https://lvjp.srht.site/wtf-go/>
