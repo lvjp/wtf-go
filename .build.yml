@@ -38,9 +38,12 @@ tasks:
       cd wtf-go/docs/book
       tar -czvf ../book.tar.gz .
   - doc-deploy: |
-      if [[ $GIT_REF == refs/heads/main ]]; then
-        hut pages publish \
-          --domain lvjp.srht.site \
-          --subdirectory wtf-go \
-          wtf-go/docs/book.tar.gz
+      if [[ $GIT_REF != refs/heads/main ]]; then
+        echo "Only deploy documentation on the main branch."
+        echo "Current branch: ${GIT_REF}"
+        exit 0
       fi
+      hut pages publish \
+        --domain lvjp.srht.site \
+        --subdirectory wtf-go \
+        wtf-go/docs/book.tar.gz
