@@ -16,9 +16,9 @@ tasks:
       sudo ln -s /usr/local/go/bin/gofmt /usr/local/bin/gofmt
   - install-golangci-lint: |
       cd /tmp
-      curl -O -sSfL https://github.com/golangci/golangci-lint/releases/download/v2.10.1/golangci-lint-2.10.1-linux-amd64.tar.gz
-      [ "$(sha256sum golangci-lint-2.10.1-linux-amd64.tar.gz | cut -d ' ' -f 1)" == "dfa775874cf0561b404a02a8f4481fc69b28091da95aa697259820d429b09c99" ]
-      sudo tar -xzf golangci-lint-2.10.1-linux-amd64.tar.gz -C /usr/local/bin --strip-components 1 golangci-lint-2.10.1-linux-amd64/golangci-lint
+      curl -O -sSfL https://github.com/golangci/golangci-lint/releases/download/v2.11.1/golangci-lint-2.11.1-linux-amd64.tar.gz
+      [ "$(sha256sum golangci-lint-2.11.1-linux-amd64.tar.gz | cut -d ' ' -f 1)" == "961fa56f05089b1734d14a90a7eb6712cbdc8082d46220b08acec52f9a78b70d" ]
+      sudo tar -xzf golangci-lint-2.11.1-linux-amd64.tar.gz -C /usr/local/bin --strip-components 1 golangci-lint-2.11.1-linux-amd64/golangci-lint
   - install-romero: |
       docker pull ne02ptzero/romero
   - go-modules: |
