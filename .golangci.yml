@@ -11,6 +11,7 @@ linters:
     - gosec
     - importas
     - misspell
+    - noctx
     - mnd
     - nestif
     - nilerr

@@ -12,7 +12,7 @@ func Run(ctx *util.Context) error {
 	endpoint := fmt.Sprintf("http://%s/api/v0/misc/health", *ctx.Config.Server.ListenAddress)
 	fmt.Fprintln(ctx.Output, "Endpoint:", endpoint)
 
-	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return fmt.Errorf("healthcheck request forging: %v", err)
 	}
