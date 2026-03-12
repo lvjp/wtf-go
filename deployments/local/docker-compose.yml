@@ -24,13 +24,4 @@ services:
     ports:
       - 8082:8080
     healthcheck:
-      test:
-        [
-          "CMD",
-          "curl",
-          "--head",
-          "--fail",
-          "--user-agent",
-          "local-healthcheck",
-          "http://localhost:8080",
-        ]
+      test: wget -S --spider http://127.0.0.1:8080 -U local-healthcheck
