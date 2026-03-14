@@ -1,0 +1,40 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:best-practices",
+    ":disableRateLimiting"
+  ],
+  "postUpdateOptions": [
+    "gomodTidy",
+    "gomodUpdateImportPaths"
+  ],
+  "dependencyDashboard": false,
+  "rebaseWhen": "behind-base-branch",
+  "timezone": "Europe/Paris",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "GitHub Actions workflows",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/"
+      ],
+      "matchStrings": [
+        ": (?<currentValue>.+) # renovate: datasource=(?<datasource>.+) depName=(?<depName>.+)"
+      ]
+    }
+  ],
+  "packageRules": [
+    {
+      "matchManagers": [
+        "gomod"
+      ],
+      "matchDepNames": [
+        "go"
+      ],
+      "matchDepTypes": [
+        "golang"
+      ],
+      "rangeStrategy": "bump"
+    }
+  ]
+}
