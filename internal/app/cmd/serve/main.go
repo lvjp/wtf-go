@@ -15,6 +15,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 )
 
@@ -27,6 +28,8 @@ func Run(ctx *util.Context) error {
 
 	apiGroup := server.Group("/api/v0")
 	misc.Route(apiGroup.Group("/misc"), misc.NewService())
+
+	server.Get("/metrics", promhttp.Handler())
 
 	var serverErr error
 	go func() {

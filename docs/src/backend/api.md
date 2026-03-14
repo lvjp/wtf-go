@@ -1,3 +1,3 @@
-# Backend API
+# User facing API
 
 {{#openapi ../../api/openapi.yaml}}

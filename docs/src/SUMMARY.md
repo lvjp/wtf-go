@@ -1,6 +1,12 @@
 # Summary
 
+## General
+
 - [Introduction](README.md)
-- [Configuration](configuration.md)
 - [Development](development.md)
-- [Backend API](backend-api.md)
+
+## Backend
+
+- [Configuration](backend/configuration.md)
+- [API](backend/api.md)
+- [Observability](backend/observability.md)

@@ -3,7 +3,7 @@
 Default path as defined in the source code :
 
 ```go
-{{#include ../../cmd/root.go:default_config_path}}
+{{#include ../../../cmd/root.go:default_config_path}}
 ```
 
 ## Syntax
