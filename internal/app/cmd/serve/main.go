@@ -7,14 +7,17 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"git.sr.ht/~lvjp/wtf-go/internal/app/api/misc"
 	"git.sr.ht/~lvjp/wtf-go/internal/pkg/cmd/util"
+	"git.sr.ht/~lvjp/wtf-go/pkg/buildinfo"
 
 	fiberzerolog "github.com/gofiber/contrib/v3/zerolog"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 )
@@ -29,6 +32,7 @@ func Run(ctx *util.Context) error {
 	apiGroup := server.Group("/api/v0")
 	misc.Route(apiGroup.Group("/misc"), misc.NewService())
 
+	prometheus.MustRegister(newCollector())
 	server.Get("/metrics", promhttp.Handler())
 
 	var serverErr error
@@ -103,4 +107,33 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 	}))
 
 	return app
+}
+
+func newCollector() prometheus.Collector {
+	bi := buildinfo.Get()
+
+	info := prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "info",
+		Help: "Information about wtf-go build",
+		ConstLabels: prometheus.Labels{
+			"revision":      bi.Revision,
+			"revision_time": bi.RevisionTime,
+			"modified":      strconv.FormatBool(bi.Modified),
+		},
+	})
+	info.Set(1)
+
+	start_date := prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "start_date_timestamp",
+		Help: "The date on which the server started expressed as an UTC Unix timestamp",
+	})
+	start_date.SetToCurrentTime()
+
+	registry := prometheus.NewRegistry()
+	registry.MustRegister(
+		info,
+		start_date,
+	)
+
+	return prometheus.WrapCollectorWithPrefix("wtf_go_", registry)
 }
