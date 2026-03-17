@@ -11,7 +11,7 @@ import (
 
 type Service interface {
 	Version(context.Context) (*api.MiscVersionResponse, error)
-	Health(context.Context) (string, error)
+	Health(context.Context) (*api.MiscHealthResponse, error)
 }
 
 func NewService() Service {
@@ -45,6 +45,6 @@ func (*service) Version(ctx context.Context) (*api.MiscVersionResponse, error) {
 	return ret, nil
 }
 
-func (*service) Health(ctx context.Context) (string, error) {
-	return "Status: OK", nil
+func (*service) Health(ctx context.Context) (*api.MiscHealthResponse, error) {
+	return &api.MiscHealthResponse{Status: "OK"}, nil
 }

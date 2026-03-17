@@ -66,10 +66,15 @@ paths:
             x-request-id:
               $ref: "#/components/headers/x-request-id"
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: "Status: OK"
+                type: object
+                required:
+                  - status
+                properties:
+                  status:
+                    type: string
+                    example: OK
         "503":
           description: The API is currently unavailable
           headers:

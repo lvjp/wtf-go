@@ -24,5 +24,5 @@ func TestOperationId_MiscHealth(t *testing.T) {
 
 	resp, err := c.MiscHealth(t.Context())
 	require.NoError(t, err)
-	require.Equal(t, []byte("Status: OK"), resp.Body)
+	require.Equal(t, "OK", resp.Status)
 }

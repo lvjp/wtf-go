@@ -21,6 +21,6 @@ func HealthHandler(service Service) fiber.Handler {
 			return err
 		}
 
-		return c.SendString(health)
+		return c.JSON(health)
 	}
 }

@@ -11,5 +11,5 @@ type MiscVersionResponse struct {
 }
 
 type MiscHealthResponse struct {
-	Body []byte
+	Status string `json:"status"`
 }

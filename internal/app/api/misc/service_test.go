@@ -11,7 +11,8 @@ func TestHealth(t *testing.T) {
 
 	resp, err := svc.Health(t.Context())
 	require.NoError(t, err)
-	require.Equal(t, "Status: OK", resp)
+	require.NotNil(t, resp, "resp should not be nil")
+	require.Equal(t, "OK", resp.Status)
 }
 
 func TestVersion(t *testing.T) {

@@ -22,7 +22,7 @@ func Run(ctx *util.Context) error {
 		return fmt.Errorf("health check failed: %v", err)
 	}
 
-	fmt.Fprintln(ctx.Output, "Status:", string(resp.Body))
+	fmt.Fprintln(ctx.Output, "Status:", resp.Status)
 
 	return nil
 }

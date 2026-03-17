@@ -139,12 +139,7 @@ func (c *Client) MiscVersion(ctx context.Context, reqEditors ...RequestEditorFn)
 }
 
 func (c *Client) MiscHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*MiscHealthResponse, error) {
-	_, body, err := doRequest(ctx, c, "MiscHealth", http.MethodGet, "misc/health", http.StatusOK, reqEditors...) //nolint:bodyclose
-	if err != nil {
-		return nil, err
-	}
-
-	return &MiscHealthResponse{Body: body}, nil
+	return doJsonRequest[MiscHealthResponse](ctx, c, "MiscHealth", http.MethodGet, "misc/health", http.StatusOK, reqEditors...)
 }
 
 func doJsonRequest[T any](ctx context.Context, c *Client, operationID, method, path string, statusCode int, reqEditors ...RequestEditorFn) (*T, error) {
