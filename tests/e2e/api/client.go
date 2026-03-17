@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"git.sr.ht/~lvjp/wtf-go/pkg/api"
+	"github.com/lvjp/wtf-go/pkg/api"
 
 	"github.com/stretchr/testify/require"
 )

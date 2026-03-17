@@ -1,4 +1,4 @@
-module git.sr.ht/~lvjp/wtf-go
+module github.com/lvjp/wtf-go
 
 go 1.26.1
 

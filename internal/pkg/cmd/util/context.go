@@ -8,7 +8,7 @@ import (
 	"os"
 	"time"
 
-	"git.sr.ht/~lvjp/wtf-go/internal/app/config"
+	"github.com/lvjp/wtf-go/internal/app/config"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"

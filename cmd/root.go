@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"git.sr.ht/~lvjp/wtf-go/internal/pkg/cmd/util"
-	"git.sr.ht/~lvjp/wtf-go/pkg/buildinfo"
+	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
+	"github.com/lvjp/wtf-go/pkg/buildinfo"
 
 	"github.com/spf13/cobra"
 )

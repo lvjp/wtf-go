@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"git.sr.ht/~lvjp/wtf-go/internal/app/cmd/serve"
-	"git.sr.ht/~lvjp/wtf-go/internal/pkg/cmd/util"
+	"github.com/lvjp/wtf-go/internal/app/cmd/serve"
+	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
 
 	"github.com/spf13/cobra"
 )

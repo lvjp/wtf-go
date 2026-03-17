@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"git.sr.ht/~lvjp/wtf-go/pkg/api"
-	"git.sr.ht/~lvjp/wtf-go/pkg/buildinfo"
+	"github.com/lvjp/wtf-go/pkg/api"
+	"github.com/lvjp/wtf-go/pkg/buildinfo"
 )
 
 type Service interface {

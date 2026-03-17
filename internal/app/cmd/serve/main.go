@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"strconv"
 
-	"git.sr.ht/~lvjp/wtf-go/internal/app/api/misc"
-	"git.sr.ht/~lvjp/wtf-go/internal/pkg/cmd/util"
-	"git.sr.ht/~lvjp/wtf-go/pkg/buildinfo"
+	"github.com/lvjp/wtf-go/internal/app/api/misc"
+	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
+	"github.com/lvjp/wtf-go/pkg/buildinfo"
 
 	fiberzerolog "github.com/gofiber/contrib/v3/zerolog"
 	"github.com/gofiber/fiber/v3"
