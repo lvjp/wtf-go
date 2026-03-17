@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"time"
 
+	"git.sr.ht/~lvjp/wtf-go/pkg/api"
 	"git.sr.ht/~lvjp/wtf-go/pkg/buildinfo"
 )
 
 type Service interface {
-	Version(context.Context) (*VersionResponse, error)
+	Version(context.Context) (*api.MiscVersionResponse, error)
 	Health(context.Context) (string, error)
 }
 
@@ -19,10 +20,10 @@ func NewService() Service {
 
 type service struct{}
 
-func (*service) Version(ctx context.Context) (*VersionResponse, error) {
+func (*service) Version(ctx context.Context) (*api.MiscVersionResponse, error) {
 	bi := buildinfo.Get()
 
-	ret := &VersionResponse{
+	ret := &api.MiscVersionResponse{
 		Go:       bi.GoVersion,
 		Modified: bi.Modified,
 		Platform: bi.GoOS + "/" + bi.GoArch,

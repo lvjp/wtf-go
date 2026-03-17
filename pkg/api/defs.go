@@ -1,11 +1,15 @@
-package misc
+package api
 
 import "time"
 
-type VersionResponse struct {
+type MiscVersionResponse struct {
 	Go       string    `json:"go"`
 	Modified bool      `json:"modified"`
 	Platform string    `json:"platform"`
 	Revision string    `json:"revision,omitempty"`
 	Time     time.Time `json:"time,omitzero"`
+}
+
+type MiscHealthResponse struct {
+	Body []byte
 }
