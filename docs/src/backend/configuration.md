@@ -6,6 +6,14 @@ Default path as defined in the source code :
 {{#include ../../../cmd/root.go:default_config_path}}
 ```
 
+## Example
+
+This is the actual configuration file used for the local deployment.
+
+```yaml
+{{#include ../../../deployments/local/config.yaml}}
+```
+
 ## Syntax
 
 `log.level`:
