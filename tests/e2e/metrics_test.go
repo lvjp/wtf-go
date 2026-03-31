@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"math"
 	"net/http"
 	"os"
 	"testing"
@@ -43,8 +44,10 @@ func TestMetrics(t *testing.T) {
 	require.NotNil(t, startDateMetric)
 	require.Len(t, startDateMetric.Metric, 1) // Should have exactly one metric
 
-	startTimestamp := float64(startDateMetric.Metric[0].GetGauge().GetValue())
+	// Precision is dependent on the Prometheus implementation,
+	// so we strip it down to seconds and compare with current time.
+	startTimestamp := math.Floor(startDateMetric.Metric[0].GetGauge().GetValue())
 	currentTimestamp := float64(time.Now().Unix())
 
-	require.Less(t, startTimestamp, currentTimestamp, "wtf_go_start_date_timestamp should be in the past")
+	require.LessOrEqual(t, startTimestamp, currentTimestamp, "wtf_go_start_date_timestamp should be in the past")
 }
