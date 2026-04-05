@@ -54,8 +54,6 @@ jobs:
 
     permissions:
       contents: read # to checkout the source code
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
 
     steps:
       - name: Checkout Code
@@ -69,6 +67,17 @@ jobs:
         with:
           path: ./docs/book
 
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
+  deploy:
+    runs-on: ubuntu-24.04
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+
+    permissions:
+      id-token: write # to verify the deployment originates from an appropriate source
+      pages: write # to deploy to Pages
+
+    needs:
+      - documentation
+
+    steps:
+      - name: Deploy documentation to GitHub Pages
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
