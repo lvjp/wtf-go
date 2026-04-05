@@ -49,6 +49,16 @@ jobs:
         env:
           TEST_WTF_GO_BACKEND_ENDPOINT: http://localhost:8081
 
+      - name: Generate docker image artifact
+        run: docker save --output wtf-go-backend.tar wtf-go-backend:latest
+
+      - name: Upload docker image artifact
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          path: wtf-go-backend.tar
+          name: docker-backend
+          if-no-files-found: error
+
   documentation:
     runs-on: ubuntu-24.04
 
@@ -75,9 +85,33 @@ jobs:
       id-token: write # to verify the deployment originates from an appropriate source
       pages: write # to deploy to Pages
 
+    environment:
+      name: production
+
     needs:
       - documentation
+      - go
 
     steps:
+      - name: Download docker backend image artifact
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: docker-backend
+
+      - name: Load docker backend image
+        run: docker load --input wtf-go-backend.tar
+
       - name: Deploy documentation to GitHub Pages
         uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
+
+      - name: Login to Scaleway Container Registry
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 # v4.1.0
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ${{ vars.DOCKER_REPOSITORY }}
+
+      - name: Tag and push docker backend image
+        run: |
+          docker tag wtf-go-backend:latest "${{ vars.DOCKER_REPOSITORY }}/backend:${{ github.sha }}"
+          docker push "${{ vars.DOCKER_REPOSITORY }}/backend:${{ github.sha }}"
