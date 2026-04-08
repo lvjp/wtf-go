@@ -35,6 +35,13 @@
         "golang"
       ],
       "rangeStrategy": "bump"
+    },
+    {
+      "groupName": "Go dependencies",
+      "matchDepNames": [
+        "go",
+        "golang"
+      ]
     }
   ]
 }
