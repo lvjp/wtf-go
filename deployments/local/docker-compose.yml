@@ -14,7 +14,7 @@ services:
     volumes:
       - ./config.yaml:/etc/wtf-go/config.yaml:ro
   swagger:
-    image: swaggerapi/swagger-ui:v5.32.1@sha256:74e37eb854b2cec5a8bcfdc4b0604a0354fbbf7209b68c3357d3221286bcb1dc
+    image: swaggerapi/swagger-ui:v5.32.2@sha256:cb6a65a418f9154293d9f8777ad50f499868292e6d19dba75d181beb266c25bc
     restart: always
     environment:
       - SWAGGER_JSON=/opt/swagger.yaml
