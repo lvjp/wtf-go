@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	configpkg "github.com/lvjp/wtf-go/cmd/config"
 	"github.com/lvjp/wtf-go/pkg/buildinfo"
 
 	"github.com/spf13/cobra"
@@ -19,6 +20,8 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	rootCmd.AddCommand(configpkg.New())
+
 	rootCmd.AddCommand(NewHealthCheckCmd())
 	rootCmd.AddCommand(NewServerCmd())
 }

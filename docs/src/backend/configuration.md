@@ -1,5 +1,9 @@
 # Configuration
 
+> [!IMPORTANT]
+> Despite our best efforts, this documentation may not be synchronized with the source code.  
+> You can use the `wtf-go config` sub-commands for an up-to-date documentation.
+
 ## Loading
 
 The configution can be loaded from several places in this order :
@@ -11,6 +15,9 @@ The configution can be loaded from several places in this order :
 5. Environment variables
 
 ## Defaults
+
+> [!TIP]
+> Can be dump with command: `wtf-go config defaults`
 
 ```yaml
 server:
@@ -28,6 +35,9 @@ For example, if you want to set `log.level`, you need to use environment variabl
 `WTF_GO_LOG.LEVEL`.
 
 ## Syntax
+
+> [!TIP]
+> Can be validate and dump with command: `wtf-go config validate`
 
 `log.level`:
 :   Level used for logging.  
