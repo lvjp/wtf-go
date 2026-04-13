@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	stdlog "log"
-	"os"
 	"time"
 
 	"github.com/lvjp/wtf-go/internal/app/config"
@@ -26,47 +25,68 @@ type Context struct {
 	Config *config.Config
 }
 
-// NewContext will print error on os.Stderr and exit with code 1 if any error occurs during
-// initialization.
-func NewContext(cmd *cobra.Command, configPath string, verbose bool) *Context {
+type ContextBuilder struct {
+	cmd *cobra.Command
+
+	configPath *string
+	verbose    *bool
+}
+
+func (cb *ContextBuilder) WithCobraCommand(cmd *cobra.Command) *ContextBuilder {
+	cb.cmd = cmd
+	return cb
+}
+
+func (cb *ContextBuilder) WithVerbose(verbose *bool) *ContextBuilder {
+	cb.verbose = verbose
+	return cb
+}
+
+func (cb *ContextBuilder) WithConfigPath(configPath *string) *ContextBuilder {
+	cb.configPath = configPath
+	return cb
+}
+
+func (cb *ContextBuilder) Build() (*Context, error) {
 	ret := &Context{
-		Context: cmd.Context(),
+		Context: cb.cmd.Context(),
 
-		Input:  cmd.InOrStdin(),
-		Output: cmd.OutOrStdout(),
-		Error:  cmd.ErrOrStderr(),
+		Input:  cb.cmd.InOrStdin(),
+		Output: cb.cmd.OutOrStdout(),
+		Error:  cb.cmd.ErrOrStderr(),
 	}
 
-	ret.CheckErr(ret.initConfig(configPath, verbose), 1)
-	ret.CheckErr(ret.initLogger(), 1)
+	if err := cb.buildConfig(ret); err != nil {
+		return nil, err
+	}
 
-	return ret
+	if err := cb.buildLogger(ret); err != nil {
+		return nil, err
+	}
+
+	return ret, nil
 }
 
-func (ctx *Context) CheckErr(err error, code int) {
-	if err == nil {
-		return
+func (cb *ContextBuilder) buildConfig(ctx *Context) error {
+	if cb.configPath == nil {
+		ctx.Config = &config.Config{}
+		ctx.Config.SetDefaults()
+	} else {
+		var err error
+		ctx.Config, err = config.LoadFromFile(*cb.configPath)
+		if err != nil {
+			return err
+		}
 	}
 
-	fmt.Fprintln(ctx.Error, "Error:", err)
-	os.Exit(code)
-}
-
-func (ctx *Context) initConfig(configPath string, verbose bool) error {
-	cfg, err := config.LoadFromFile(configPath)
-	if err != nil {
-		return err
+	if cb.verbose != nil && *cb.verbose {
+		ctx.Config.Log.Level = "debug"
 	}
 
-	if verbose {
-		cfg.Log.Level = "debug"
-	}
-
-	ctx.Config = cfg
 	return nil
 }
 
-func (ctx *Context) initLogger() error {
+func (cb *ContextBuilder) buildLogger(ctx *Context) error {
 	writer := ctx.Error
 
 	var unknowFormat bool

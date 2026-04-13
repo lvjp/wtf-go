@@ -3,7 +3,7 @@
 Default path as defined in the source code :
 
 ```go
-{{#include ../../../cmd/root.go:default_config_path}}
+{{#include ../../../internal/pkg/cmd/util/flags.go:default_config_path}}
 ```
 
 ## Example

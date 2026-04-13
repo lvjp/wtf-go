@@ -7,13 +7,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func NewHealthCheckCmd(factory *util.Factory) *cobra.Command {
-	return &cobra.Command{
+func NewHealthCheckCmd() *cobra.Command {
+	var ctxBuilder util.ContextBuilder
+
+	cmd := &cobra.Command{
 		Use:   "healthcheck",
 		Short: "Check the health of the server",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			ctx := factory.NewContext(cmd)
+			ctx, err := ctxBuilder.Build()
+			if err != nil {
+				return err
+			}
+
 			return healthcheck.Run(ctx)
 		},
 	}
+
+	flags := cmd.Flags()
+
+	ctxBuilder.
+		WithCobraCommand(cmd).
+		WithVerbose(util.NewVerboseFlag(flags)).
+		WithConfigPath(util.NewConfigFlag(flags))
+
+	return cmd
 }
