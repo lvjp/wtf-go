@@ -39,7 +39,7 @@ func Run(ctx *util.Context) error {
 	go func() {
 		defer cancel()
 
-		serverErr = server.Listen(*ctx.Config.Server.ListenAddress)
+		serverErr = server.Listen(ctx.Config.Server.ListenAddress)
 	}()
 
 	<-ctx.Done()

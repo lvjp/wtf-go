@@ -4,7 +4,7 @@ import "github.com/spf13/pflag"
 
 func NewConfigFlag(flags *pflag.FlagSet) *string {
 	// ANCHOR: default_config_path
-	return flags.String("config", "/etc/wtf-go/config.yaml", "Path to the configuration file")
+	return flags.String("config", "", "Path to the configuration file")
 	// ANCHOR_END: default_config_path
 }
 

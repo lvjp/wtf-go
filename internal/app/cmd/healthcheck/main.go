@@ -9,7 +9,7 @@ import (
 )
 
 func Run(ctx *util.Context) error {
-	endpoint := fmt.Sprintf("http://%s/api/v0", *ctx.Config.Server.ListenAddress)
+	endpoint := fmt.Sprintf("http://%s/api/v0", ctx.Config.Server.ListenAddress)
 	fmt.Fprintln(ctx.Output, "Endpoint:", endpoint)
 
 	c, err := api.NewClient(endpoint, api.WithUserAgent("wtf-go/"+buildinfo.Get().Revision))

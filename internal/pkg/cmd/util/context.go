@@ -68,20 +68,35 @@ func (cb *ContextBuilder) Build() (*Context, error) {
 }
 
 func (cb *ContextBuilder) buildConfig(ctx *Context) error {
-	if cb.configPath == nil {
-		ctx.Config = &config.Config{}
-		ctx.Config.SetDefaults()
+	opts := []config.NewOption{
+		config.WithDefaults(),
+		config.WithEnvVars(),
+	}
+
+	if cb.configPath != nil && *cb.configPath != "" {
+		opts = append(opts, config.WithConfigFile(*cb.configPath))
 	} else {
-		var err error
-		ctx.Config, err = config.LoadFromFile(*cb.configPath)
-		if err != nil {
-			return err
-		}
+		opts = append(opts, config.WithConfigLookup())
 	}
 
 	if cb.verbose != nil && *cb.verbose {
-		ctx.Config.Log.Level = "debug"
+		opts = append(opts, config.WithLogLevel("debug"))
 	}
+
+	cfg, pathUsed, err := config.New(opts...)
+	if err != nil {
+		return fmt.Errorf("config builder: %v", err)
+	}
+
+	ctx.Logger.Debug().
+		Str("path", pathUsed).
+		Msg("configuration loaded")
+
+	if err := cfg.Validate(); err != nil {
+		return err
+	}
+
+	ctx.Config = cfg
 
 	return nil
 }
