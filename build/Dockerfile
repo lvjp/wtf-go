@@ -1,4 +1,4 @@
-FROM golang:1.26.2-alpine3.23@sha256:c2a1f7b2095d046ae14b286b18413a05bb82c9bca9b25fe7ff5efef0f0826166 AS build
+FROM golang:1.26.2-trixie@sha256:c0074c718b473f3827043f86532c4c0ff537e3fe7a81b8219b0d1ccfcc2c9a09 AS build
 
 WORKDIR /opt/wtf-go/src
 
@@ -11,7 +11,7 @@ RUN --mount=type=bind,target=.,readonly \
     --mount=type=cache,target=/go/pkg/mod \
     go mod download -x && CGO_ENABLED=0 go build -o /opt/wtf-go/wtf-go .
 
-FROM alpine:3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+FROM debian:13.4-slim@sha256:4ffb3a1511099754cddc70eb1b12e50ffdb67619aa0ab6c13fcd800a78ef7c7a
 
 COPY --from=build /opt/wtf-go/wtf-go /usr/bin
 ENTRYPOINT ["/usr/bin/wtf-go"]
