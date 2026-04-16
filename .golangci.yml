@@ -62,6 +62,12 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+    rules:
+      # Needed till this issue is not resolved: https://github.com/Antonboom/testifylint/issues/307
+      - path: pkg/auth/token/store_memory_test\.go
+        text: "require-error: for error assertions use require"
+        linters:
+          - testifylint
 formatters:
   enable:
     - gci
