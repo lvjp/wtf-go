@@ -11,7 +11,7 @@ RUN --mount=type=bind,target=.,readonly \
     --mount=type=cache,target=/go/pkg/mod \
     go mod download -x && CGO_ENABLED=0 go build -o /opt/wtf-go/wtf-go .
 
-FROM debian:13.4-slim@sha256:4ffb3a1511099754cddc70eb1b12e50ffdb67619aa0ab6c13fcd800a78ef7c7a
+FROM debian:13.4-slim@sha256:cedb1ef40439206b673ee8b33a46a03a0c9fa90bf3732f54704f99cb061d2c5a
 
 COPY --from=build /opt/wtf-go/wtf-go /usr/bin
 ENTRYPOINT ["/usr/bin/wtf-go"]
