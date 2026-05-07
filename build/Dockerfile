@@ -1,4 +1,4 @@
-FROM golang:1.26.2-trixie@sha256:c0074c718b473f3827043f86532c4c0ff537e3fe7a81b8219b0d1ccfcc2c9a09 AS build
+FROM golang:1.26.3-trixie@sha256:38a4ee13cf5097699c2dfc949f0930394afba0fca853d7094eace21037981f01 AS build
 
 WORKDIR /opt/wtf-go/src
 

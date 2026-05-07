@@ -1,6 +1,6 @@
 module github.com/lvjp/wtf-go
 
-go 1.26.2
+go 1.26.3
 
 require (
 	github.com/go-playground/validator/v10 v10.30.2
