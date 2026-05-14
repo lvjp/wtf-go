@@ -3,10 +3,10 @@ package defaults
 import (
 	"fmt"
 
+	"github.com/goccy/go-yaml"
+
 	"github.com/lvjp/wtf-go/internal/app/config"
 	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
-
-	"github.com/goccy/go-yaml"
 )
 
 func Run(ctx *util.Context) error {

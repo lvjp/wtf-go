@@ -3,9 +3,9 @@ package dump
 import (
 	"fmt"
 
-	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
-
 	"github.com/goccy/go-yaml"
+
+	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
 )
 
 func Run(ctx *util.Context) error {

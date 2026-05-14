@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
 	configpkg "github.com/lvjp/wtf-go/cmd/config"
 	"github.com/lvjp/wtf-go/pkg/buildinfo"
-
-	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{

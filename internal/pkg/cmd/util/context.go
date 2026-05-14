@@ -7,11 +7,11 @@ import (
 	stdlog "log"
 	"time"
 
-	"github.com/lvjp/wtf-go/internal/app/config"
-
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
+
+	"github.com/lvjp/wtf-go/internal/app/config"
 )
 
 type Context struct {

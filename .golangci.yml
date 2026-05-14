@@ -1,25 +1,32 @@
 version: "2"
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
 linters:
   enable:
     - asciicheck
     - bodyclose
     - dupl
+    - errcheck
     - errname
+    - exhaustive
     - goconst
     - gocritic
     - gocyclo
     - gosec
     - importas
     - misspell
-    - noctx
     - mnd
     - nestif
     - nilerr
     - nilnil
+    - noctx
+    - nolintlint
     - revive
     - testifylint
     - unconvert
     - whitespace
+    - wrapcheck
     - zerologlint
   settings:
     errcheck:
@@ -27,13 +34,13 @@ linters:
       check-type-assertions: true
       # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
       check-blank: true
+    gocyclo:
+      # minimal code complexity to report, 30 by default
+      min-complexity: 15
     gosec:
       excludes:
         - G704 # Broken: https://github.com/securego/gosec/pull/1522
         - G705 # Broken: https://github.com/securego/gosec/pull/1522
-    gocyclo:
-      # minimal code complexity to report, 30 by default
-      min-complexity: 15
     govet:
       enable:
         # Check for redundant or impossible nil comparisons.
@@ -44,6 +51,10 @@ linters:
       rules:
         - name: package-comments
           disabled: true
+    wrapcheck:
+      ignore-package-globs:
+        # Ignore our local modules, as they have a lot of places where errors are not wrapped, and it's not worth the effort to fix them.
+        - github.com/lvjp/wtf-go/*
   exclusions:
     generated: strict
     presets:
@@ -59,8 +70,8 @@ formatters:
     gci:
       sections:
         - standard
-        - localmodule
         - default
+        - localmodule
       custom-order: true
   exclusions:
     generated: strict

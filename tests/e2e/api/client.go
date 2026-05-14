@@ -4,9 +4,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/lvjp/wtf-go/pkg/api"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/lvjp/wtf-go/pkg/api"
 )
 
 func NewClient(t *testing.T) *api.Client {

@@ -9,10 +9,6 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/lvjp/wtf-go/internal/app/api/misc"
-	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
-	"github.com/lvjp/wtf-go/pkg/buildinfo"
-
 	fiberzerolog "github.com/gofiber/contrib/v3/zerolog"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
@@ -20,6 +16,10 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
+
+	"github.com/lvjp/wtf-go/internal/app/api/misc"
+	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
+	"github.com/lvjp/wtf-go/pkg/buildinfo"
 )
 
 func Run(ctx *util.Context) error {

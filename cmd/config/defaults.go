@@ -1,10 +1,10 @@
 package config
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/lvjp/wtf-go/internal/app/cmd/config/defaults"
 	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
-
-	"github.com/spf13/cobra"
 )
 
 func NewDefaultsCmd() *cobra.Command {
