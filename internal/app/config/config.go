@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/go-viper/mapstructure/v2"
@@ -11,6 +12,11 @@ import (
 type Config struct {
 	Server Server
 	Log    Log
+	Auth   Auth
+}
+
+type Auth struct {
+	TokenTTL time.Duration `yaml:"token_ttl" validate:"required,gte=1h"`
 }
 
 type Server struct {
@@ -38,6 +44,7 @@ func WithDefaults() NewOption {
 		f.viper.SetDefault("server.listen_address", ":8080")
 		f.viper.SetDefault("log.level", "info")
 		f.viper.SetDefault("log.format", "json")
+		f.viper.SetDefault("auth.token_ttl", "24h")
 	}
 }
 
@@ -122,6 +129,7 @@ func (f *factory) create() (*Config, string, error) {
 	cfg.Server.ListenAddress = f.viper.GetString("server.listen_address")
 	cfg.Log.Level = f.viper.GetString("log.level")
 	cfg.Log.Format = f.viper.GetString("log.format")
+	cfg.Auth.TokenTTL = f.viper.GetDuration("auth.token_ttl")
 
 	return &cfg, f.viper.ConfigFileUsed(), nil
 }

@@ -17,6 +17,12 @@ type Client struct {
 	opts Options
 }
 
+// NewClient creates a new API client targeting the given endpoint.
+//
+// Authentication is managed automatically: calling AuthTokenCreate sets the
+// token on the client, and AuthTokenRevoke clears it. All requests issued
+// between those two calls are authenticated transparently. To start with an
+// existing token, pass WithAuthToken as an option.
 func NewClient(endpoint string, optsFn ...OptionsFn) *Client {
 	var opts Options
 	opts.SetDefaults()
@@ -38,6 +44,13 @@ func (c *Client) doRequest(ctx context.Context, operationID, method, path string
 
 	for _, o := range caller {
 		o(&opts)
+	}
+
+	if opts.AuthToken != "" {
+		opts.Middlewares = append(opts.Middlewares, MiddlewareFunc(func(ctx context.Context, cc *CallContext, next Handler) error {
+			cc.Request.Header.Set("Authorization", "Bearer "+opts.AuthToken)
+			return next.Handle(ctx, cc)
+		}))
 	}
 
 	opts.Middlewares = append(opts.Middlewares, internal...)
@@ -67,6 +80,7 @@ type Options struct {
 	Endpoint    string
 	HTTPClient  HTTPRequestDoer
 	Middlewares []Middleware
+	AuthToken   string
 }
 
 func (o Options) Copy() Options {
@@ -111,4 +125,10 @@ func WithUserAgent(userAgent string) OptionsFn {
 		cc.Request.Header.Set("User-Agent", userAgent)
 		return next.Handle(ctx, cc)
 	}))
+}
+
+func WithAuthToken(token string) OptionsFn {
+	return func(o *Options) {
+		o.AuthToken = token
+	}
 }

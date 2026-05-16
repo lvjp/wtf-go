@@ -17,6 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 
+	"github.com/lvjp/wtf-go/internal/app/api/auth"
 	"github.com/lvjp/wtf-go/internal/app/api/misc"
 	"github.com/lvjp/wtf-go/internal/pkg/cmd/util"
 	"github.com/lvjp/wtf-go/pkg/buildinfo"
@@ -31,6 +32,7 @@ func Run(ctx *util.Context) error {
 
 	apiGroup := server.Group("/api/v0")
 	misc.Route(apiGroup.Group("/misc"), misc.NewService())
+	auth.Route(apiGroup.Group("/auth/token"), auth.NewService(ctx.Config.Auth))
 
 	prometheus.MustRegister(newCollector())
 	server.Get("/metrics", promhttp.Handler())
@@ -101,7 +103,8 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:        []string{"*"},
-		AllowMethods:        []string{fiber.MethodGet},
+		AllowMethods:        []string{fiber.MethodGet, fiber.MethodPost, fiber.MethodDelete},
+		AllowHeaders:        []string{fiber.HeaderAuthorization, fiber.HeaderContentType},
 		ExposeHeaders:       []string{"X-Request-ID"},
 		AllowPrivateNetwork: true,
 	}))

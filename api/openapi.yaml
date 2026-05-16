@@ -5,17 +5,84 @@ info:
 servers:
   - url: "http://localhost:8081/api/v0"
 tags:
+  - name: Authentication
   - name: Miscellaneous
-# No authentication scheme declared
-security: []
+security:
+  - bearerAuth: []
 paths:
+  /auth/token:
+    post:
+      tags:
+        - Authentication
+      summary: Create a new token
+      operationId: AuthTokenCreate
+      security: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject:
+                  type: string
+                  description: Arbitrary label identifying the token holder
+                  example: my-api-client
+      responses:
+        "201":
+          description: Token created
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/x-request-id"
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - not_after
+                properties:
+                  id:
+                    type: string
+                    description: Unique opaque token ID — use as Bearer value
+                    example: 550e8400-e29b-41d4-a716-446655440000
+                  not_after:
+                    type: string
+                    format: date-time
+                    description: Expiry time in RFC3339 format
+                    example: "2026-05-15T12:00:00Z"
+        "400":
+          description: Invalid request (e.g. malformed ttl)
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/x-request-id"
+    delete:
+      tags:
+        - Authentication
+      summary: Revoke the currently used token
+      operationId: AuthTokenRevoke
+      responses:
+        "204":
+          description: Token revoked
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/x-request-id"
+        "401":
+          description: Missing or invalid Bearer token
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/x-request-id"
+        "403":
+          description: Unauthorized to revoke the token used for authentication.
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/x-request-id"
   /misc/version:
     get:
       tags:
         - Miscellaneous
       summary: Return the version
       operationId: MiscVersion
-      # No security required for this endpoint as it is a public call
       security: []
       responses:
         "200":
@@ -57,7 +124,6 @@ paths:
         - Miscellaneous
       summary: Return the health status of the API
       operationId: MiscHealth
-      # No security required for this endpoint as it is a public call
       security: []
       responses:
         "200":
@@ -81,6 +147,11 @@ paths:
             x-request-id:
               $ref: "#/components/headers/x-request-id"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Unique opaque token ID obtained from POST /auth/token
   headers:
     x-request-id:
       description: Unique identifier for the request

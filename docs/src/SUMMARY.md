@@ -9,4 +9,5 @@
 
 - [Configuration](backend/configuration.md)
 - [API](backend/api.md)
+- [Authentication](backend/authentication.md)
 - [Observability](backend/observability.md)

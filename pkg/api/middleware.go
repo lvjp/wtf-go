@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -51,6 +52,21 @@ func checkStatusCode(expectedStatusCode int) Middleware {
 		}
 
 		return nil
+	})
+}
+
+func serializeJSON[T any](src T) Middleware {
+	return MiddlewareFunc(func(ctx context.Context, cc *CallContext, next Handler) error {
+		data, err := json.Marshal(src)
+		if err != nil {
+			return fmt.Errorf("client.%s: failed to marshal request body: %w", cc.OperationID, err)
+		}
+
+		cc.Request.Body = io.NopCloser(bytes.NewReader(data))
+		cc.Request.ContentLength = int64(len(data))
+		cc.Request.Header.Set("Content-Type", "application/json")
+
+		return next.Handle(ctx, cc)
 	})
 }
 
