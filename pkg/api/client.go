@@ -2,186 +2,113 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"net/url"
+	"slices"
+
+	"github.com/lvjp/wtf-go/pkg/chain-of-responsibility"
 )
 
-func NewBadStatusCodeError(body []byte, resp *http.Response, expectedStatusCode int, operationID string) error {
-	return &HTTPRequestError{
-		Body:         body,
-		HTTPResponse: resp,
-		Message: fmt.Sprintf(
-			"client.%s: unexpected status code: %d, expected: %d",
-			operationID,
-			resp.StatusCode,
-			expectedStatusCode,
-		),
-	}
-}
-
-func NewHTTPError(body []byte, resp *http.Response, message string, wrapped error) error {
-	return &HTTPRequestError{
-		Body:         body,
-		HTTPResponse: resp,
-		Message:      fmt.Sprintf("%s: %v", message, wrapped),
-		Wrapped:      wrapped,
-	}
-}
-
-type HTTPRequestError struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	Message      string
-	Wrapped      error
-}
-
-func (e *HTTPRequestError) Error() string {
-	return e.Message
-}
-
-func (e *HTTPRequestError) Unwrap() error {
-	return e.Wrapped
-}
-
-type ClientInterface interface {
-	MiscVersion(context.Context) (*MiscVersionResponse, error)
-	MiscHealth(context.Context) (*MiscHealthResponse, error)
-}
-
-type RequestEditorFn func(ctx context.Context, req *http.Request) error
-
-type HttpRequestDoer interface {
+type HTTPRequestDoer interface {
 	Do(*http.Request) (*http.Response, error)
 }
 
 type Client struct {
-	Endpoint       *url.URL
-	Client         HttpRequestDoer
-	RequestEditors []RequestEditorFn
+	opts Options
 }
 
-type ClientOption func(*Client) error
+func NewClient(endpoint string, optsFn ...OptionsFn) *Client {
+	var opts Options
+	opts.SetDefaults()
 
-func WithHTTPClient(client HttpRequestDoer) ClientOption {
-	return func(c *Client) error {
-		c.Client = client
-		return nil
+	// endpoint is not validated, but it will be used as-is in the http.NewRequest(),
+	// which will return an error if the endpoint is invalid.
+	opts.Endpoint = endpoint
+
+	for _, o := range optsFn {
+		o(&opts)
 	}
+
+	// Copy options to ensure immutability of the client after creation.
+	return &Client{opts: opts.Copy()}
 }
 
-func WithRequestEditor(editor RequestEditorFn) ClientOption {
-	return func(c *Client) error {
-		c.RequestEditors = append(c.RequestEditors, editor)
-		return nil
+func (c *Client) doRequest(ctx context.Context, operationID, method, path string, caller []OptionsFn, internal ...Middleware) error {
+	opts := c.opts.Copy()
+
+	for _, o := range caller {
+		o(&opts)
 	}
-}
 
-func WithUserAgent(userAgent string) ClientOption {
-	return WithRequestEditor(func(ctx context.Context, req *http.Request) error {
-		req.Header.Set("User-Agent", userAgent)
-		return nil
-	})
-}
+	opts.Middlewares = append(opts.Middlewares, internal...)
 
-func NewClient(endpoint string, opts ...ClientOption) (*Client, error) {
-	u, err := url.Parse(endpoint)
+	httpReq, err := http.NewRequestWithContext(ctx, method, opts.Endpoint, nil)
 	if err != nil {
-		return nil, fmt.Errorf("client: failed to parse endpoint: %w", err)
+		return fmt.Errorf("client.%s: failed to create request: %w", operationID, err)
 	}
 
-	return NewClientWithURL(u, opts...)
+	httpReq.URL = httpReq.URL.JoinPath(path)
+
+	wc := &CallContext{
+		Request:     httpReq,
+		OperationID: operationID,
+	}
+
+	h := chain.NewChain(httpHandler(opts.HTTPClient), opts.Middlewares...)
+	return h.Handle(ctx, wc)
 }
 
-func NewClientWithURL(endpoint *url.URL, opts ...ClientOption) (*Client, error) {
-	if endpoint == nil {
-		return nil, fmt.Errorf("client: endpoint cannot be nil")
-	}
+type Handler = chain.Handler[*CallContext]
+type HandlerFunc = chain.HandlerFunc[*CallContext]
+type Middleware = chain.Middleware[*CallContext]
+type MiddlewareFunc = chain.MiddlewareFunc[*CallContext]
 
-	c := Client{
-		Endpoint: endpoint,
-	}
-
-	for _, o := range opts {
-		if err := o(&c); err != nil {
-			return nil, err
-		}
-	}
-
-	// If no client is provided, use the default HTTP client.
-	if c.Client == nil {
-		c.Client = http.DefaultClient
-	}
-
-	return &c, nil
+type Options struct {
+	Endpoint    string
+	HTTPClient  HTTPRequestDoer
+	Middlewares []Middleware
 }
 
-func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
-	for _, r := range c.RequestEditors {
-		if err := r(ctx, req); err != nil {
-			return err
-		}
-	}
+func (o Options) Copy() Options {
+	to := o
+	to.Middlewares = slices.Clone(o.Middlewares)
 
-	for _, r := range additionalEditors {
-		if err := r(ctx, req); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return to
 }
 
-func (c *Client) MiscVersion(ctx context.Context, reqEditors ...RequestEditorFn) (*MiscVersionResponse, error) {
-	return doJsonRequest[MiscVersionResponse](ctx, c, "MiscVersion", http.MethodGet, "misc/version", http.StatusOK, reqEditors...)
+func (o *Options) SetDefaults() {
+	if o.HTTPClient == nil {
+		o.HTTPClient = http.DefaultClient
+	}
 }
 
-func (c *Client) MiscHealth(ctx context.Context, reqEditors ...RequestEditorFn) (*MiscHealthResponse, error) {
-	return doJsonRequest[MiscHealthResponse](ctx, c, "MiscHealth", http.MethodGet, "misc/health", http.StatusOK, reqEditors...)
+// OptionsFn configures a Client. It intentionally returns no error: anything
+// that can fail (loading a certificate, validating a parameter) must be
+// resolved before constructing the OptionsFn, not inside it. This keeps
+// NewClient infallible and pushes error handling to the call site.
+type OptionsFn func(*Options)
+
+func WithHTTPClient(client HTTPRequestDoer) OptionsFn {
+	return func(o *Options) {
+		o.HTTPClient = client
+	}
 }
 
-func doJsonRequest[T any](ctx context.Context, c *Client, operationID, method, path string, statusCode int, reqEditors ...RequestEditorFn) (*T, error) {
-	httpResp, body, err := doRequest(ctx, c, operationID, method, path, statusCode, reqEditors...) //nolint:bodyclose
-	if err != nil {
-		return nil, err
+func WithMiddleware(middleware Middleware) OptionsFn {
+	return func(o *Options) {
+		o.Middlewares = append(o.Middlewares, middleware)
 	}
-
-	var resp T
-	if err := json.Unmarshal(body, &resp); err != nil {
-		return nil, NewHTTPError(body, httpResp, fmt.Sprintf("client.%s: failed to unmarshal response body", operationID), err)
-	}
-
-	return &resp, nil
 }
 
-func doRequest(ctx context.Context, c *Client, operationID, method, path string, statusCode int, reqEditors ...RequestEditorFn) (*http.Response, []byte, error) {
-	u := c.Endpoint.JoinPath(path)
-
-	httpReq, err := http.NewRequestWithContext(ctx, method, u.String(), nil)
-	if err != nil {
-		return nil, nil, fmt.Errorf("client.%s: failed to create request: %w", operationID, err)
+func WithMiddlewareFunc(middlewareFunc MiddlewareFunc) OptionsFn {
+	return func(o *Options) {
+		o.Middlewares = append(o.Middlewares, middlewareFunc)
 	}
+}
 
-	if applyErr := c.applyEditors(ctx, httpReq, reqEditors); applyErr != nil {
-		return nil, nil, fmt.Errorf("client.%s: failed to apply request editors: %w", operationID, applyErr)
-	}
-
-	httpResp, err := c.Client.Do(httpReq)
-	if err != nil {
-		return nil, nil, fmt.Errorf("client.%s: request failed: %w", operationID, err)
-	}
-	defer httpResp.Body.Close()
-
-	body, err := io.ReadAll(httpResp.Body)
-	if err != nil {
-		return httpResp, nil, fmt.Errorf("client.%s: failed to read response body: %w", operationID, err)
-	}
-
-	if httpResp.StatusCode != statusCode {
-		return httpResp, body, NewBadStatusCodeError(body, httpResp, statusCode, operationID)
-	}
-
-	return httpResp, body, nil
+func WithUserAgent(userAgent string) OptionsFn {
+	return WithMiddleware(MiddlewareFunc(func(ctx context.Context, cc *CallContext, next Handler) error {
+		cc.Request.Header.Set("User-Agent", userAgent)
+		return next.Handle(ctx, cc)
+	}))
 }
