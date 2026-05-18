@@ -1,0 +1,5 @@
+ignore:
+  # Ignore all files related to the command line since there are not unit tests for them.
+  - "cmd/**"
+  - "internal/pkg/cmd/**"
+  - "internal/app/cmd/**"

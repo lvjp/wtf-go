@@ -67,6 +67,21 @@ func TestManager_Create(t *testing.T) {
 		require.Nil(t, token)
 	})
 
+	t.Run("marshall error", func(t *testing.T) {
+		m, err := NewManager[*TestData](UUIDGenerator, NewMemoryStore())
+		require.NoError(t, err)
+		require.NotNil(t, m)
+
+		data := &TestData{
+			Key:   "invalid:key",
+			Value: "value",
+		}
+		token, err := m.Create(t.Context(), time.Second, data)
+		require.ErrorIs(t, err, ErrMarshalData)
+		require.ErrorContains(t, err, "invalid character ':' in key")
+		require.Nil(t, token)
+	})
+
 	t.Run("normal", func(t *testing.T) {
 		synctest.Test(t, func(t *testing.T) {
 			m, err := NewManager[*TestData](UUIDGenerator, NewMemoryStore())
@@ -96,38 +111,92 @@ func TestManager_Lookup(t *testing.T) {
 		require.Nil(t, token)
 	})
 
-	synctest.Test(t, func(t *testing.T) {
-		m, err := NewManager[*TestData](UUIDGenerator, NewMemoryStore())
-		require.NoError(t, err)
-		require.NotNil(t, m)
+	t.Run("expiration", func(t *testing.T) {
+		synctest.Test(t, func(t *testing.T) {
+			m, err := NewManager[*TestData](UUIDGenerator, NewMemoryStore())
+			require.NoError(t, err)
+			require.NotNil(t, m)
 
-		const ttl = 42 * time.Second
-		expirationTime := time.Now().Add(ttl)
-		token, err := m.Create(t.Context(), ttl, newTestData())
+			const ttl = 42 * time.Second
+			expirationTime := time.Now().Add(ttl)
+			token, err := m.Create(t.Context(), ttl, newTestData())
+			require.NoError(t, err)
+			require.NotNil(t, token)
+			require.Equal(t, expirationTime, token.NotAfter)
+
+			// Check that token can be read before NotAfter time
+			time.Sleep(time.Until(expirationTime) - time.Nanosecond)
+			require.True(t, time.Now().Before(expirationTime))
+			beforeToken, err := m.Lookup(t.Context(), token.ID)
+			require.NoError(t, err)
+			require.Equal(t, token, beforeToken)
+
+			// Check that token can still be read at exactly NotAfter time
+			time.Sleep(time.Nanosecond)
+			require.Equal(t, time.Now(), expirationTime)
+			atToken, err := m.Lookup(t.Context(), token.ID)
+			require.NoError(t, err)
+			require.Equal(t, token, atToken)
+
+			// Check that token cannot be read after NotAfter time
+			time.Sleep(time.Nanosecond)
+			require.True(t, time.Now().After(expirationTime))
+			afterToken, err := m.Lookup(t.Context(), token.ID)
+			require.ErrorIs(t, err, ErrExpiredToken)
+			require.Nil(t, afterToken)
+		})
+	})
+
+	t.Run("unmarshal error", func(t *testing.T) {
+		synctest.Test(t, func(t *testing.T) {
+			raw := StoredToken{
+				ID:       uuid.NewString(),
+				Data:     []byte("random data that cannot be unmarshalled"),
+				NotAfter: time.Now().Add(time.Second),
+			}
+
+			store := NewMemoryStore()
+			err := store.Create(t.Context(), raw)
+			require.NoError(t, err)
+
+			m, err := NewManager[*TestData](UUIDGenerator, store)
+			require.NoError(t, err)
+			require.NotNil(t, m)
+			token, err := m.Lookup(t.Context(), raw.ID)
+			require.ErrorIs(t, err, ErrUnmarshalData)
+			require.ErrorContains(t, err, "invalid data format")
+			require.Nil(t, token)
+		})
+	})
+}
+
+func TestManager_Revoke(t *testing.T) {
+	m, err := NewManager[*TestData](UUIDGenerator, NewMemoryStore())
+	require.NoError(t, err)
+	require.NotNil(t, m)
+
+	t.Run("empty", func(t *testing.T) {
+		err := m.Revoke(t.Context(), "")
+		require.NoError(t, err)
+	})
+
+	t.Run("not found", func(t *testing.T) {
+		err := m.Revoke(t.Context(), uuid.NewString())
+		require.NoError(t, err)
+	})
+
+	t.Run("normal", func(t *testing.T) {
+		data := newTestData()
+		token, err := m.Create(t.Context(), time.Second, data)
 		require.NoError(t, err)
 		require.NotNil(t, token)
-		require.Equal(t, expirationTime, token.NotAfter)
 
-		// Check that token can be read before NotAfter time
-		time.Sleep(time.Until(expirationTime) - time.Nanosecond)
-		require.True(t, time.Now().Before(expirationTime))
-		beforeToken, err := m.Lookup(t.Context(), token.ID)
+		err = m.Revoke(t.Context(), token.ID)
 		require.NoError(t, err)
-		require.Equal(t, token, beforeToken)
 
-		// Check that token can still be read at exactly NotAfter time
-		time.Sleep(time.Nanosecond)
-		require.Equal(t, time.Now(), expirationTime)
-		atToken, err := m.Lookup(t.Context(), token.ID)
-		require.NoError(t, err)
-		require.Equal(t, token, atToken)
-
-		// Check that token cannot be read after NotAfter time
-		time.Sleep(time.Nanosecond)
-		require.True(t, time.Now().After(expirationTime))
-		afterToken, err := m.Lookup(t.Context(), token.ID)
-		require.ErrorIs(t, err, ErrExpiredToken)
-		require.Nil(t, afterToken)
+		revokedToken, err := m.Lookup(t.Context(), token.ID)
+		require.ErrorIs(t, err, ErrNotFound)
+		require.Nil(t, revokedToken)
 	})
 }
 

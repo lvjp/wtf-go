@@ -5,6 +5,12 @@ import (
 	"runtime/debug"
 )
 
+const keyRevision = "vcs.revision"
+const keyRevisionTime = "vcs.time"
+const keyModified = "vcs.modified"
+const keyGoOS = "GOOS"
+const keyGoArch = "GOARCH"
+
 type BuildInfo struct {
 	Revision     string
 	RevisionTime string
@@ -42,15 +48,15 @@ func (bi *BuildInfo) Load(raw *debug.BuildInfo) {
 
 	for _, s := range raw.Settings {
 		switch s.Key {
-		case "vcs.revision":
+		case keyRevision:
 			bi.Revision = s.Value
-		case "vcs.time":
+		case keyRevisionTime:
 			bi.RevisionTime = s.Value
-		case "vcs.modified":
+		case keyModified:
 			bi.Modified = s.Value == "true"
-		case "GOOS":
+		case keyGoOS:
 			bi.GoOS = s.Value
-		case "GOARCH":
+		case keyGoArch:
 			bi.GoArch = s.Value
 		}
 	}

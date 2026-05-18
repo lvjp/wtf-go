@@ -55,12 +55,27 @@ func TestWithEnvVars(t *testing.T) {
 }
 
 func TestConfigBuilder_WithConfigFile(t *testing.T) {
-	expectedUsedPath, expectedConfig := generateDefaultYaml(t)
+	t.Run("normal", func(t *testing.T) {
+		expectedUsedPath, expectedConfig := generateDefaultYaml(t)
 
-	actualConfig, actualUsedPath, err := New(WithConfigFile(expectedUsedPath))
-	require.NoError(t, err)
-	require.Equal(t, expectedUsedPath, actualUsedPath)
-	require.Equal(t, expectedConfig, actualConfig)
+		actualConfig, actualUsedPath, err := New(WithConfigFile(expectedUsedPath))
+		require.NoError(t, err)
+		require.Equal(t, expectedUsedPath, actualUsedPath)
+		require.Equal(t, expectedConfig, actualConfig)
+	})
+
+	t.Run("invalid path", func(t *testing.T) {
+		_, _, err := New(WithConfigFile("/path/does/not/exist.yaml"))
+		require.Error(t, err)
+		require.ErrorContains(t, err, "config file loading: ")
+	})
+}
+
+func TestConfigBuilder_multipleConfig(t *testing.T) {
+	expectedUsedPath, _ := generateDefaultYaml(t)
+
+	_, _, err := New(WithConfigFile(expectedUsedPath), WithConfigLookup())
+	require.ErrorIs(t, err, errConflictingConfigSources)
 }
 
 func generateDefaultYaml(t *testing.T) (string, *Config) {

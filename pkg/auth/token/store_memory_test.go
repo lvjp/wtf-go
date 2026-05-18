@@ -55,6 +55,14 @@ func TestInMemoryStore(t *testing.T) {
 			require.Equal(t, 0, syncMapCount(&memory.tokens))
 		})
 
+		t.Run("empty ID", func(t *testing.T) {
+			var memory memoryStore
+
+			token, err := memory.Read(t.Context(), "")
+			require.ErrorIs(t, err, ErrEmptyID)
+			require.Nil(t, token)
+		})
+
 		t.Run("different tokenID", func(t *testing.T) {
 			var memory memoryStore
 

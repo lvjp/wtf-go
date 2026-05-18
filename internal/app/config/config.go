@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var errConflictingConfigSources = fmt.Errorf("cannot use both config lookup and config file options")
+
 type Config struct {
 	Server Server
 	Log    Log
@@ -102,7 +104,7 @@ type factory struct {
 func (f *factory) create() (*Config, string, error) {
 	switch {
 	case f.withConfigLookup && f.withConfigFile:
-		return nil, "", fmt.Errorf("cannot use both config lookup and config file options")
+		return nil, "", errConflictingConfigSources
 
 	case f.withConfigFile:
 		if err := f.viper.ReadInConfig(); err != nil {
