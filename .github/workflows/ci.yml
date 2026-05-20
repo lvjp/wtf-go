@@ -28,12 +28,7 @@ jobs:
       - run: go mod tidy -diff
 
       - name: Unit tests
-        run: go test -v -coverprofile=coverage.txt ./...
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+        run: go test -v -coverprofile=coverage-ut.txt ./...
 
       - name: Race detection
         run: go test -race -v ./...
@@ -48,14 +43,35 @@ jobs:
         run: docker compose build backend
         working-directory: ./deployments/local
 
+      - name: Build coverage Docker image
+        run: docker compose -f docker-compose.yml -f docker-compose.coverage.yml build backend
+        working-directory: ./deployments/local
+
+      - name: Create e2e coverage directory
+        run: mkdir -p ./deployments/local/coverage
+
       - name: Deploy local test cluster
-        run: docker compose up --detach --wait
+        run: docker compose -f docker-compose.yml -f docker-compose.coverage.yml up --detach --wait
         working-directory: ./deployments/local
 
       - name: Run integration tests
-        run: go test -v ./tests/e2e/...
+        run: go test -v -coverprofile=coverage-e2e.txt ./tests/e2e/...
         env:
           TEST_WTF_GO_BACKEND_ENDPOINT: http://localhost:8081
+
+      - name: Stop cluster to flush coverage
+        run: docker compose -f docker-compose.yml -f docker-compose.coverage.yml down
+        working-directory: ./deployments/local
+
+      - name: Convert e2e coverage
+        run: go tool covdata textfmt -i=./deployments/local/coverage -o coverage-server.txt
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage-ut.txt,coverage-server.txt,coverage-e2e.txt
+          disable_search: true
 
       - name: Generate docker image artifact
         run: docker save --output wtf-go-backend.tar wtf-go-backend:latest

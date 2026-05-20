@@ -6,10 +6,11 @@ RUN go env
 RUN [ $(go env GOCACHE) = /root/.cache/go-build ]
 RUN [ $(go env GOMODCACHE) = /go/pkg/mod ]
 
+ARG COVER
 RUN --mount=type=bind,target=.,readonly \
     --mount=type=cache,target=/root/.cache/go-build \
     --mount=type=cache,target=/go/pkg/mod \
-    go mod download -x && CGO_ENABLED=0 go build -o /opt/wtf-go/wtf-go .
+    go mod download -x && CGO_ENABLED=0 go build ${COVER:+-cover} -o /opt/wtf-go/wtf-go .
 
 FROM debian:13.4-slim@sha256:109e2c65005bf160609e4ba6acf7783752f8502ad218e298253428690b9eaa4b
 

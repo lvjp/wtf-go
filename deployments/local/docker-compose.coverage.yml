@@ -1,0 +1,11 @@
+---
+services:
+  backend:
+    image: wtf-go-backend:coverage
+    build:
+      args:
+        COVER: "1"
+    environment:
+      GOCOVERDIR: /tmp/gocov
+    volumes:
+      - ./coverage:/tmp/gocov
