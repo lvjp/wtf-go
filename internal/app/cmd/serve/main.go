@@ -7,7 +7,9 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os/signal"
 	"strconv"
+	"syscall"
 
 	fiberzerolog "github.com/gofiber/contrib/v3/zerolog"
 	"github.com/gofiber/fiber/v3"
@@ -25,7 +27,7 @@ import (
 
 func Run(ctx *util.Context) error {
 	var cancel context.CancelFunc
-	ctx.Context, cancel = context.WithCancel(ctx.Context)
+	ctx.Context, cancel = signal.NotifyContext(ctx.Context, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
 	server := newFiberApp(&ctx.Logger)
