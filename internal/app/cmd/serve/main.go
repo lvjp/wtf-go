@@ -39,22 +39,26 @@ func Run(ctx *util.Context) error {
 	prometheus.MustRegister(newCollector())
 	server.Get("/metrics", promhttp.Handler())
 
-	var serverErr error
+	listenErr := make(chan error, 1)
 	go func() {
-		defer cancel()
-
-		serverErr = server.Listen(ctx.Config.Server.ListenAddress)
+		listenErr <- server.Listen(ctx.Config.Server.ListenAddress)
 	}()
 
-	<-ctx.Done()
-	ctx.Logger.Info().Msg("Server shutdown sequence started")
+	select {
+	case <-ctx.Done():
+		ctx.Logger.Info().Msg("Server shutdown sequence started")
 
-	if serverErr != nil && !errors.Is(serverErr, http.ErrServerClosed) {
-		return fmt.Errorf("ListenAndServe error: %v", serverErr)
-	}
+		if err := server.Shutdown(); err != nil {
+			return fmt.Errorf("could not shutdown server: %v", err)
+		}
 
-	if err := server.Shutdown(); err != nil {
-		return fmt.Errorf("could not shutdown server: %v", err)
+		if err := <-listenErr; err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return fmt.Errorf("ListenAndServe error: %v", err)
+		}
+	case err := <-listenErr:
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			return fmt.Errorf("ListenAndServe error: %v", err)
+		}
 	}
 
 	return nil
