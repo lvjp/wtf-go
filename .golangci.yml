@@ -10,11 +10,19 @@ linters:
     - errcheck
     - errname
     - exhaustive
+    - fatcontext
+    - forcetypeassert
     - goconst
     - gocritic
     - gocyclo
+    - godoclint
+    - godot
+    - goprintffuncname
     - gosec
+    - govet
+    - iface
     - importas
+    - ineffassign
     - misspell
     - mnd
     - nestif
@@ -22,9 +30,18 @@ linters:
     - nilnil
     - noctx
     - nolintlint
+    - prealloc
+    - promlinter
+    - reassign
     - revive
+    - staticcheck
     - testifylint
     - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - usetesting
+    - wastedassign
     - whitespace
     - wrapcheck
     - zerologlint
