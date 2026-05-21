@@ -25,12 +25,12 @@ import (
 	"github.com/lvjp/wtf-go/pkg/buildinfo"
 )
 
-func Run(ctx *util.Context) error {
+func Run(ctx *util.Context, endpoint chan<- string) error {
 	var cancel context.CancelFunc
 	ctx.Context, cancel = signal.NotifyContext(ctx.Context, syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
 
-	server := newFiberApp(&ctx.Logger)
+	server := newFiberApp(&ctx.Logger, endpoint)
 
 	apiGroup := server.Group("/api/v0")
 	misc.Route(apiGroup.Group("/misc"), misc.NewService())
@@ -64,7 +64,7 @@ func Run(ctx *util.Context) error {
 	return nil
 }
 
-func newFiberApp(logger *zerolog.Logger) *fiber.App {
+func newFiberApp(logger *zerolog.Logger, endpoint chan<- string) *fiber.App {
 	app := fiber.New()
 
 	app.Hooks().OnListen(func(listenData fiber.ListenData) error {
@@ -75,6 +75,10 @@ func newFiberApp(logger *zerolog.Logger) *fiber.App {
 
 		if listenData.TLS {
 			u.Scheme = "https"
+		}
+
+		if endpoint != nil {
+			endpoint <- u.String()
 		}
 
 		logger.Info().

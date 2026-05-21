@@ -19,7 +19,7 @@ func NewServerCmd() *cobra.Command {
 				return err
 			}
 
-			return serve.Run(ctx)
+			return serve.Run(ctx, nil)
 		},
 	}
 
