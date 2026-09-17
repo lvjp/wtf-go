@@ -67,7 +67,7 @@ jobs:
         run: go tool covdata textfmt -i=./deployments/local/coverage -o coverage-server.txt
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+        uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: coverage-ut.txt,coverage-server.txt,coverage-e2e.txt
