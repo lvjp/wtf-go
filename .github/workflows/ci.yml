@@ -9,7 +9,7 @@ permissions: {}
 
 jobs:
   go:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     permissions:
       contents: read
@@ -84,7 +84,7 @@ jobs:
           if-no-files-found: error
 
   documentation:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     permissions:
       contents: read # to checkout the source code
@@ -102,7 +102,7 @@ jobs:
           path: ./docs/book
 
   deploy:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     if: ${{ startsWith(github.ref, 'refs/tags/') }}
 
     permissions:
